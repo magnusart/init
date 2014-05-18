@@ -205,7 +205,7 @@ partprobe "${DEVICE}" 2>&1 | grep -v \
 if [[ -n "${CLOUDINIT}" ]]; then
     # The ROOT partition should be #9 but make no assumptions here!
     # Also don't mount by label directly in case other devices conflict.
-    ROOT_DEV=$(lsblk -rp -o name,partlabel "${DEVICE}"  | \
+    ROOT_DEV=$(lsblk -rP -o name,label "${DEVICE}"  | \
                awk '$2 == "ROOT" {print $1; exit}')
 
     if [[ -z "${ROOT_DEV}" ]]; then
@@ -215,7 +215,7 @@ if [[ -n "${CLOUDINIT}" ]]; then
 
     echo "Installing cloud-config..."
     mkdir -p "${WORKDIR}/rootfs"
-    mount -t btrfs -o subvol=root "${ROOT_DEV}" "${WORKDIR}/rootfs"
+    mount -t btrfs -o subvol=root "/dev/${ROOT_DEV}" "${WORKDIR}/rootfs"
     trap "umount '${WORKDIR}/rootfs' && rm -rf '${WORKDIR}'" EXIT
 
     mkdir -p "${WORKDIR}/rootfs/var/lib/coreos-install"
